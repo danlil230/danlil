@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Remaster 9.0 - BenQ Edition</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb, #d4fc79, #96e6a1, #fbc531);
+            background-size: 400% 400%;
+            animation: rainbowBG 12s ease infinite;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        @keyframes rainbowBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .easter-egg {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.7;
+            animation: floatEgg 8s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes floatEgg {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.9; }
+            80% { opacity: 0.9; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        h1 {
+            font-size: 26px;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            margin-bottom: 8px;
+        }
+
+        .benq-banner {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.3);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .score-box {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn {
+            position: relative;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                60deg,
+                transparent,
+                rgba(255, 255, 255, 0.5),
+                transparent
+            );
+            transform: rotate(30deg) translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .btn:hover::after {
+            transform: rotate(30deg) translateX(100%);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            filter: brightness(1.15);
+        }
+
+        .btn:active {
+            transform: translateY(2px) scale(0.98);
+        }
+
+        .btn-green {
+            background: linear-gradient(90deg, #00b09b, #96c93d);
+        }
+
+        .btn-purple {
+            background: linear-gradient(90deg, #8a2be2, #4158d0);
+        }
+
+        .btn-blue {
+            background: linear-gradient(90deg, #2193b0, #6dd5ed);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="easter-egg" style="left: 10%; animation-delay: 0s;">🚀</div>
+    <div class="easter-egg" style="left: 30%; animation-delay: 3s;">⭐</div>
+    <div class="easter-egg" style="left: 70%; animation-delay: 1.5s;">🎉</div>
+    <div class="easter-egg" style="left: 85%; animation-delay: 4s;">💻</div>
+
+    <div class="container">
+        <h1>Super Remaster 9.0</h1>
+        <div class="benq-banner">🎥 Проект BenQ: Ура, каникулы! ✨</div>
+
+        <div class="score-box" id="score">0</div>
+
+        <button class="btn" id="clickBtn">🖱️ Кликнуть в кликере!</button>
+        <button class="btn btn-green" id="upgradeBtn">⚡ Улучшение (+1)</button>
+        <button class="btn btn-blue" id="game1Btn">🎮 Мини-игра: Угадай число</button>
+        <button class="btn btn-blue" id="game2Btn">🎲 Мини-игра: Тест на реакцию</button>
+        <button class="btn btn-purple" id="bonusBtn">🎁 Бонус Спердани & Scratch</button>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let score = 0;
+        let clickPower = 1;
+
+        const scoreEl = document.getElementById('score');
+        const clickBtn = document.getElementById('clickBtn');
+        const upgradeBtn = document.getElementById('upgradeBtn');
+        const game1Btn = document.getElementById('game1Btn');
+        const game2Btn = document.getElementById('game2Btn');
+        const bonusBtn = document.getElementById('bonusBtn');
+
+        clickBtn.addEventListener('click', () => {
+            score += clickPower;
+            scoreEl.textContent = score;
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        });
+
+        upgradeBtn.addEventListener('click', () => {
+            if (score >= 10) {
+                score -= 10;
+                clickPower += 1;
+                scoreEl.textContent = score;
+                upgradeBtn.textContent = `⚡ Улучшение (+${clickPower})`;
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            } else {
+                alert('Нужно больше очков! (надо 10)');
+            }
+        });
+
+        game1Btn.addEventListener('click', () => {
+            let userGuess = prompt('Угадай число от 1 до 5, которое загадал бот:');
+            let secretNumber = Math.floor(Math.random() * 5) + 1;
+            if (userGuess == secretNumber) {
+                score += 25;
+                alert(`🎉 Победа! Ты угадал число ${secretNumber}! Получено +25 очков!`);
+            } else {
+                alert(`❌ Не угадал! Бот загадал число: ${secretNumber}. Попробуй еще раз!`);
+            }
+            scoreEl.textContent = score;
+        });
+
+        game2Btn.addEventListener('click', () => {
+            let bonusPoints = Math.floor(Math.random() * 50) + 10;
+            score += bonusPoints;
+            alert(`⚡ Реакция отличная! Секретный бонус принес тебе +${bonusPoints} очков!`);
+            scoreEl.textContent = score;
+        });
+
+        bonusBtn.addEventListener('click', () => {
+            alert('🎉 Проект BenQ активирован! Спердани + Scratch на связи. Ура, каникулы!');
+        });
+
+        window.addEventListener('scroll', () => {
+            let scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+            document.body.style.filter = `hue-rotate(${scrollPercent * 360}deg)`;
+        });
+    </script>
+</body>
+</html>
